@@ -52,8 +52,8 @@ const chunkLoader: ChunkLoader = {
 
 const version = (v: string) => parseSemVer(v)!;
 const hostProvided: HostProvided = {
-  react: version("18.3.1"),
-  "react-native": version("0.76.6"),
+  react: version("19.1.0"),
+  "react-native": version("0.80.0"),
 };
 
 export function MiniappScreen({ id }: { id: string }) {
