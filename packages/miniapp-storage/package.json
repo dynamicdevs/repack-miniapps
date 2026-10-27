@@ -9,30 +9,62 @@
     "directory": "packages/miniapp-storage"
   },
   "homepage": "https://github.com/DentVega/repack-miniapps/tree/main/packages/miniapp-storage#readme",
-  "bugs": { "url": "https://github.com/DentVega/repack-miniapps/issues" },
+  "bugs": {
+    "url": "https://github.com/DentVega/repack-miniapps/issues"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./vercel-blob": { "types": "./dist/vercel-blob.d.ts", "default": "./dist/vercel-blob.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./vercel-blob": {
+      "types": "./dist/vercel-blob.d.ts",
+      "default": "./dist/vercel-blob.js"
+    }
   },
-  "files": ["dist"],
-  "publishConfig": { "access": "public" },
-  "keywords": ["repack", "module-federation", "miniapp", "storage", "s3", "r2", "gcs", "azure"],
-  "engines": { "node": ">=20" },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "repack",
+    "module-federation",
+    "miniapp",
+    "storage",
+    "s3",
+    "r2",
+    "gcs",
+    "azure"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "prepack": "pnpm build"
   },
-  "dependencies": { "aws4fetch": "^1.0.20" },
-  "peerDependencies": { "@vercel/blob": "^2.0.0" },
-  "peerDependenciesMeta": { "@vercel/blob": { "optional": true } },
+  "dependencies": {
+    "aws4fetch": "^1.0.20"
+  },
+  "peerDependencies": {
+    "@vercel/blob": "^2.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@vercel/blob": {
+      "optional": true
+    }
+  },
   "devDependencies": {
     "@vercel/blob": "^2.6.1",
     "typescript": "^5.6.3",
+    "vite": "^7.3.7",
     "vitest": "^4.1.10"
   }
 }
