@@ -57,7 +57,7 @@ import { checkCompatibility, type HostContract } from "@dentvega/miniapp-contrac
 const host: HostContract = {
   contractVersion: "0.1.0",
   reactNative: "0.76.6",
-  shared: { react: "18.3.1", "react-native": "0.76.6", "@dentvega/ui-kit": "0.1.1" },
+  shared: { react: "18.3.1", "react-native": "0.76.6", "@tanstack/react-query": "5.101.2" },
   nativeModules: ["react-native-screens"],
 };
 
