@@ -1,4 +1,4 @@
-/** Pure validation / parsing for the contract. Unit-tested in Bolt 1. */
+/** Pure validation / parsing for the contract. */
 import type { Capability, HostContract, Manifest, MiniappId, SemVer, SharedDepSpec } from "./types.js";
 
 const SEMVER_RE = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;

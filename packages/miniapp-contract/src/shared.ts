@@ -1,6 +1,6 @@
 /**
  * Version-skew detection for shared singletons.
- * Reused by the host loader (Bolt 4) AND by Backstage to validate
+ * Reused by the host loader AND by Backstage to validate
  * compatibility at publish time.
  *
  * `satisfiesShared` resolves real semver ranges (compound `>=x <y`, `||`,

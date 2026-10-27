@@ -22,7 +22,7 @@ export interface SharedDepSpec {
 
 /**
  * Scoped, revocable permissions the host grants a miniapp.
- * NEVER a raw credential. Seed set — extend as real miniapps land (Bolt 3+).
+ * NEVER a raw credential. Extend the set as new miniapps need it.
  */
 export type Capability = "accounts:read" | "session:whoami";
 
@@ -42,9 +42,8 @@ export interface Manifest {
   readonly shared: readonly SharedDepSpec[];
   readonly capabilities: readonly Capability[];
   /**
-   * Integrity descriptor (hash or signature). The verification MECHANISM is
-   * decided by ADR-001 in Bolt 4; in Bolt 1 the field is optional and its
-   * content is not validated.
+   * Integrity descriptor (sha256 of the chunk). Optional in the manifest; the
+   * contract does not validate its content, the host verifies it on download.
    */
   readonly integrity?: string;
   /**
