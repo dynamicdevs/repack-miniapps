@@ -12,7 +12,7 @@ import { hostCompatReport } from "../compat.js";
 import type { HostContract, Manifest } from "../types.js";
 
 const mf = (version: string): Manifest =>
-  ({ id: "lab_saludo", version, entry: "./Entry", shared: [], capabilities: [] }) as unknown as Manifest;
+  ({ id: "minima", version, entry: "./Entry", shared: [], capabilities: [] }) as unknown as Manifest;
 
 const entry = (version: string, ios: boolean): ManifestVersionEntry => ({
   manifest: mf(version),
@@ -25,8 +25,8 @@ const body: ControlManifestBody = {
   seq: 1761050000000,
   issuedAt: "2026-10-21T12:00:00.000Z",
   expiresAt: "2026-10-28T12:00:00.000Z",
-  hosts: { "0.2.0": { lab_saludo: { stable: "0.1.7" as never, candidate: "0.1.8" as never } } },
-  versions: { lab_saludo: { "0.1.7": entry("0.1.7", true), "0.1.8": entry("0.1.8", false) } },
+  hosts: { "0.2.0": { minima: { stable: "0.1.7" as never, candidate: "0.1.8" as never } } },
+  versions: { minima: { "0.1.7": entry("0.1.7", true), "0.1.8": entry("0.1.8", false) } },
 };
 
 describe("canonicalJson", () => {
@@ -61,36 +61,36 @@ describe("isSignedControlManifest", () => {
 
 describe("selectVersion", () => {
   it("candidate con artefacto android", () => {
-    const r = selectVersion(body, "0.2.0", "lab_saludo", "candidate", "android");
+    const r = selectVersion(body, "0.2.0", "minima", "candidate", "android");
     expect(r?.version).toBe("0.1.8");
     expect(r?.channelUsed).toBe("candidate");
   });
   it("candidate en ios sin artefacto → estable", () => {
-    const r = selectVersion(body, "0.2.0", "lab_saludo", "candidate", "ios");
+    const r = selectVersion(body, "0.2.0", "minima", "candidate", "ios");
     expect(r?.version).toBe("0.1.7");
     expect(r?.channelUsed).toBe("stable");
     expect(r?.artifact.url).toContain("ios");
   });
   it("lib → estable", () => {
-    expect(selectVersion(body, "0.2.0", "lab_saludo", "lib", "android")?.version).toBe("0.1.7");
+    expect(selectVersion(body, "0.2.0", "minima", "lib", "android")?.version).toBe("0.1.7");
   });
   it("stable sin stable → null", () => {
-    const b = { ...body, hosts: { "0.2.0": { lab_saludo: { candidate: "0.1.8" as never } } } };
-    expect(selectVersion(b, "0.2.0", "lab_saludo", "stable", "android")).toBeNull();
+    const b = { ...body, hosts: { "0.2.0": { minima: { candidate: "0.1.8" as never } } } };
+    expect(selectVersion(b, "0.2.0", "minima", "stable", "android")).toBeNull();
   });
   it("id desconocido o host sin bloque → null", () => {
     expect(selectVersion(body, "0.2.0", "nope", "stable", "android")).toBeNull();
-    expect(selectVersion(body, "9.9.9", "lab_saludo", "stable", "android")).toBeNull();
+    expect(selectVersion(body, "9.9.9", "minima", "stable", "android")).toBeNull();
   });
   it("candidata retirada → cae a la estable", () => {
-    const { "0.1.8": _r, ...rest } = body.versions.lab_saludo!;
-    const b = { ...body, versions: { lab_saludo: rest } };
-    expect(selectVersion(b, "0.2.0", "lab_saludo", "candidate", "android")?.version).toBe("0.1.7");
+    const { "0.1.8": _r, ...rest } = body.versions.minima!;
+    const b = { ...body, versions: { minima: rest } };
+    expect(selectVersion(b, "0.2.0", "minima", "candidate", "android")?.version).toBe("0.1.7");
   });
   it("estable retirada → null", () => {
-    const { "0.1.7": _r, ...rest } = body.versions.lab_saludo!;
-    const b = { ...body, versions: { lab_saludo: rest } };
-    expect(selectVersion(b, "0.2.0", "lab_saludo", "stable", "android")).toBeNull();
+    const { "0.1.7": _r, ...rest } = body.versions.minima!;
+    const b = { ...body, versions: { minima: rest } };
+    expect(selectVersion(b, "0.2.0", "minima", "stable", "android")).toBeNull();
   });
 });
 
