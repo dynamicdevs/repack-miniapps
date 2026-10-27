@@ -21,5 +21,5 @@ export {
   isStorageProvider,
   type StorageProvider,
 } from "./provider.js";
-// blobStorage NO se exporta acá: vive en "@dentvega/miniapp-storage/vercel-blob"
+// blobStorage NO se exporta aquí: vive en "@dentvega/miniapp-storage/vercel-blob"
 // porque @vercel/blob es un peer opcional.

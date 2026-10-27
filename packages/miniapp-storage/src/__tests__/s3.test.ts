@@ -48,7 +48,7 @@ describe("s3Storage", () => {
       fake,
     ).putMany("app/1.0.0", [{ path: "a.bundle", data: new Uint8Array([1]) }]);
     expect(calls[0]!.url).toBe("https://my-bucket.s3.eu-west-1.amazonaws.com/app/1.0.0/a.bundle");
-    // AWS acepta chunked: pinear content-length es un workaround de R2, no va acá.
+    // AWS acepta chunked: pinear content-length es un workaround de R2, no va aquí.
     expect(calls[0]!.init.headers!["content-length"]).toBeUndefined();
   });
 });
