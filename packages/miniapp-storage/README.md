@@ -58,11 +58,11 @@ const storage = r2Storage({
   publicBaseUrl: "https://pub-xxxx.r2.dev", // where the app downloads from
 });
 
-const { baseUrl } = await storage.putMany("cards_wallet/0.1.19", [
-  { path: "cards_wallet.container.js.bundle", data: androidBundle },
-  { path: "ios/cards_wallet.container.js.bundle", data: iosBundle },
+const { baseUrl } = await storage.putMany("account_dashboard/0.1.19", [
+  { path: "account_dashboard.container.js.bundle", data: androidBundle },
+  { path: "ios/account_dashboard.container.js.bundle", data: iosBundle },
 ]);
-// baseUrl → "https://pub-xxxx.r2.dev/cards_wallet/0.1.19"
+// baseUrl → "https://pub-xxxx.r2.dev/account_dashboard/0.1.19"
 ```
 
 `publicBaseUrl` is where the host **reads** from, and can differ from the write endpoint (an R2

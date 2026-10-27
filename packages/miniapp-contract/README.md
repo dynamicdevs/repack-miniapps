@@ -41,12 +41,12 @@ ESM only. MIT.
 ```ts
 import { isManifest, isHostContract, parseMiniappId } from "@dentvega/miniapp-contract";
 
-const res = await fetch(`${registry}/api/resolve?id=cards_wallet`);
+const res = await fetch(`${registry}/api/resolve?id=account_dashboard`);
 const body = (await res.json()) as { manifest?: unknown };
 if (!isManifest(body.manifest)) throw new Error("invalid manifest");
 // body.manifest is now typed as Manifest
 
-const id = parseMiniappId("cards_wallet"); // MiniappId | null
+const id = parseMiniappId("account_dashboard"); // MiniappId | null
 ```
 
 ### Check a miniapp against a host
