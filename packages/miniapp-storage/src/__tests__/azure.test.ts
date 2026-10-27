@@ -115,3 +115,15 @@ describe("availableProviders con Azure", () => {
     ).toEqual(["azure", "fs"]);
   });
 });
+
+describe("azureConfigFromEnv con variables vacías (Docker Compose)", () => {
+  it("AZURE_STORAGE_PUBLIC_BASE_URL vacía cae a la URL del contenedor", () => {
+    const cfg = azureConfigFromEnv({
+      AZURE_STORAGE_ACCOUNT: "acct",
+      AZURE_STORAGE_CONTAINER: "chunks",
+      AZURE_STORAGE_SAS_TOKEN: "sv=1",
+      AZURE_STORAGE_PUBLIC_BASE_URL: "",
+    });
+    expect(cfg!.publicBaseUrl).toBe("https://acct.blob.core.windows.net/chunks");
+  });
+});

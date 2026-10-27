@@ -44,3 +44,11 @@ describe("availableProviders con GCS", () => {
     expect(availableProviders(env)).toEqual(["gcs", "fs"]);
   });
 });
+
+describe("gcsConfigFromEnv con variables vacías (Docker Compose)", () => {
+  it("GCS_PUBLIC_BASE_URL vacía cae a la URL pública de GCS", () => {
+    expect(gcsConfigFromEnv({ ...env, GCS_PUBLIC_BASE_URL: "" })!.publicBaseUrl).toBe(
+      "https://storage.googleapis.com/my-bucket",
+    );
+  });
+});

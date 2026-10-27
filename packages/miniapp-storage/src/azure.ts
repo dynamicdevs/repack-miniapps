@@ -22,7 +22,7 @@ export function azureConfigFromEnv(
     container,
     sasToken: raw.replace(/^\?/, ""),
     publicBaseUrl:
-      env.AZURE_STORAGE_PUBLIC_BASE_URL ??
+      env.AZURE_STORAGE_PUBLIC_BASE_URL ||
       `https://${account}.blob.core.windows.net/${container}`,
   };
 }

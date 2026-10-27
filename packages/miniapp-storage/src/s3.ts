@@ -23,7 +23,7 @@ export function s3ConfigFromEnv(env: Record<string, string | undefined>): S3Conf
     accessKeyId,
     secretAccessKey,
     // Sin CDN explícito, se lee del propio bucket (requiere que sea público).
-    publicBaseUrl: env.AWS_S3_PUBLIC_BASE_URL ?? `https://${bucket}.s3.${region}.amazonaws.com`,
+    publicBaseUrl: env.AWS_S3_PUBLIC_BASE_URL || `https://${bucket}.s3.${region}.amazonaws.com`,
   };
 }
 

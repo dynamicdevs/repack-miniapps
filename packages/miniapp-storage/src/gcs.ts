@@ -19,7 +19,7 @@ export function gcsConfigFromEnv(env: Record<string, string | undefined>): GcsCo
     bucket,
     accessKeyId,
     secretAccessKey,
-    publicBaseUrl: env.GCS_PUBLIC_BASE_URL ?? `https://storage.googleapis.com/${bucket}`,
+    publicBaseUrl: env.GCS_PUBLIC_BASE_URL || `https://storage.googleapis.com/${bucket}`,
   };
 }
 

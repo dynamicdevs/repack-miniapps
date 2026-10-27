@@ -65,3 +65,16 @@ describe("availableProviders con S3", () => {
     ).toEqual(["s3", "fs"]);
   });
 });
+
+describe("s3ConfigFromEnv con variables vacías (Docker Compose)", () => {
+  it("AWS_S3_PUBLIC_BASE_URL vacía cae a la URL del bucket", () => {
+    const cfg = s3ConfigFromEnv({
+      AWS_S3_BUCKET: "b",
+      AWS_REGION: "us-east-1",
+      AWS_ACCESS_KEY_ID: "k",
+      AWS_SECRET_ACCESS_KEY: "s",
+      AWS_S3_PUBLIC_BASE_URL: "",
+    });
+    expect(cfg!.publicBaseUrl).toBe("https://b.s3.us-east-1.amazonaws.com");
+  });
+});
