@@ -13,6 +13,12 @@ export { r2Storage, r2ConfigFromEnv, type R2Config } from "./r2.js";
 export { s3Storage, s3ConfigFromEnv, type S3Config } from "./s3.js";
 export { gcsStorage, gcsConfigFromEnv, type GcsConfig } from "./gcs.js";
 export { azureStorage, azureConfigFromEnv, type AzureConfig } from "./azure.js";
+export {
+  modyoStorage,
+  modyoConfigFromEnv,
+  modyoWidgetName,
+  type ModyoConfig,
+} from "./modyo.js";
 export { fsStorage } from "./fs.js";
 export { mockStorage } from "./mock.js";
 export {

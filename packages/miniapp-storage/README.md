@@ -9,6 +9,7 @@ miniapp platform. One small interface, interchangeable adapters:
 | `s3Storage` | AWS S3 (optionally behind CloudFront) | SigV4 |
 | `gcsStorage` | Google Cloud Storage | HMAC interoperability keys (SigV4) |
 | `azureStorage` | Azure Blob Storage | SAS token |
+| `modyoStorage` | Modyo (one widget per version) | Admin API token |
 | `blobStorage` | Vercel Blob (subpath `@dentvega/miniapp-storage/vercel-blob`) | `BLOB_READ_WRITE_TOKEN` |
 | `fsStorage` | Local filesystem (development) | — |
 | `mockStorage` | In-memory (tests) | — |
@@ -79,6 +80,7 @@ the variables are missing:
 | S3 | `AWS_S3_BUCKET`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, optional `AWS_S3_PUBLIC_BASE_URL` |
 | GCS | `GCS_BUCKET`, `GCS_HMAC_ACCESS_KEY_ID`, `GCS_HMAC_SECRET`, optional `GCS_PUBLIC_BASE_URL` |
 | Azure | `AZURE_STORAGE_ACCOUNT`, `AZURE_STORAGE_CONTAINER`, `AZURE_STORAGE_SAS_TOKEN`, optional `AZURE_STORAGE_PUBLIC_BASE_URL` |
+| Modyo | `MODYO_ACCOUNT_URL`, `MODYO_SITE_ID`, `MODYO_TOKEN`, `MODYO_PUBLIC_URL_TEMPLATE`, optional `MODYO_VERSION` (`8`, `9` or `10`, default `10`) and `MODYO_WIDGET_PREFIX` (default `miniapp`) |
 | Vercel Blob | `BLOB_READ_WRITE_TOKEN` |
 
 ```ts
@@ -88,10 +90,23 @@ const config = r2ConfigFromEnv(process.env);
 if (config) storage = r2Storage(config);
 ```
 
+### Modyo
+
+`modyoStorage` uses the same admin API as `modyo-cli push --zip`: each versioned prefix becomes a
+widget named `<MODYO_WIDGET_PREFIX>-<prefix with / replaced by ->` (for example
+`miniapp-lab_saludo-0.1.18-ios`), which is found or created, updated with a zip of the files and
+published. The CLI itself is not usable here because its zip only keeps top-level `.js`, `.json`,
+`.css` and `.wasm` files.
+
+The API does not return the public URL of a widget's files, so `MODYO_PUBLIC_URL_TEMPLATE` sets
+it, with `{widgetId}` and/or `{name}` (for example `https://cdn.example.com/widgets/{widgetId}`).
+Take it from a published widget before enabling the provider. `deletePrefix` does nothing: pruned
+versions stay published in Modyo.
+
 ### Picking a provider
 
 When several providers are configured, `availableProviders(env)` lists them in precedence order
-(`s3`, `r2`, `gcs`, `azure`, `blob`, and always `fs` last), and `selectStorage` picks the
+(`s3`, `r2`, `gcs`, `azure`, `modyo`, `blob`, and always `fs` last), and `selectStorage` picks the
 effective one:
 
 ```ts

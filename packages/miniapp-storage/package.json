@@ -1,7 +1,7 @@
 {
   "name": "@dentvega/miniapp-storage",
-  "version": "0.2.2",
-  "description": "Multi-cloud chunk storage for Re.Pack miniapp platforms: R2, S3, GCS, Azure, Vercel Blob, fs.",
+  "version": "0.3.0",
+  "description": "Multi-cloud chunk storage for Re.Pack miniapp platforms: R2, S3, GCS, Azure, Modyo, Vercel Blob, fs.",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -19,7 +19,7 @@
   },
   "files": ["dist"],
   "publishConfig": { "access": "public" },
-  "keywords": ["repack", "module-federation", "miniapp", "storage", "s3", "r2", "gcs", "azure"],
+  "keywords": ["repack", "module-federation", "miniapp", "storage", "s3", "r2", "gcs", "azure", "modyo"],
   "engines": { "node": ">=20" },
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
@@ -27,7 +27,7 @@
     "test": "vitest run",
     "prepack": "pnpm build"
   },
-  "dependencies": { "aws4fetch": "^1.0.20" },
+  "dependencies": { "aws4fetch": "^1.0.20", "fflate": "^0.8.3" },
   "peerDependencies": { "@vercel/blob": "^2.0.0" },
   "peerDependenciesMeta": { "@vercel/blob": { "optional": true } },
   "devDependencies": {
