@@ -46,6 +46,23 @@ interface ChunkStorage {
 }
 ```
 
+## Local modules
+
+Our own repos don't install these packages from npm: each one carries a copy in
+`modules/<package>` and depends on it with `file:./modules/<package>`. This repo is the single
+source; `sync-modules` builds the packages and copies them:
+
+```bash
+pnpm modules ../port-lab miniapp-contract miniapp-storage   # copy (builds first)
+node modules/sync-modules.mjs --check .                     # in the consumer: copies untouched?
+```
+
+Each module has `package.json` (no publish or dev fields; sibling packages via `file:`), `src/`
+without tests, `dist/` and `README.md`. `modules/.source.json` records the commit and a sha256 per
+file: `--check` fails if a copy was edited by hand, and `sync-modules` refuses to overwrite an
+edited copy unless `--force` is passed. After updating a module, run `pnpm install` in the
+consumer (pnpm copies `file:` dependencies at install time).
+
 ## Development
 
 ```bash
