@@ -20,11 +20,15 @@ export type EvaluateResult =
  * declares `minHostContract` and the host exposes its own `hostContractVersion` —
  * the "host-too-old" guard: an old host binary in the field refuses to mount a
  * miniapp that requires a newer contract (instead of crashing). Pure — reused in tests.
+ *
+ * Con `host` (nombre del host), el mínimo es su entrada de `minHostContracts`; si no la hay,
+ * solo se compara react-native del `minHostContract` (el contractVersion de otro host no aplica).
  */
 export function evaluateManifest(
   manifest: unknown,
   hostProvided: HostProvided,
   hostContractVersion?: string,
+  host?: string,
 ): EvaluateResult {
   if (!isManifest(manifest)) {
     return { ok: false, reason: "invalid-manifest", detail: "bad manifest shape" };
@@ -37,9 +41,10 @@ export function evaluateManifest(
       .join(", ");
     return { ok: false, reason: "skew", detail: `incompatible: ${bad}` };
   }
-  const min = manifest.minHostContract;
+  const own = host ? manifest.minHostContracts?.[host] : undefined;
+  const min = own ?? manifest.minHostContract;
   if (min !== undefined && hostContractVersion !== undefined) {
-    const cvOk = gteVersion(hostContractVersion, min.contractVersion);
+    const cvOk = (host && own === undefined) || gteVersion(hostContractVersion, min.contractVersion);
     const rnOk = gteVersion(hostProvided["react-native"] ?? "", min.reactNative);
     if (!cvOk || !rnOk) {
       const why = [

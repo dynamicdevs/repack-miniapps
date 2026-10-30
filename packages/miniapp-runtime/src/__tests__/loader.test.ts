@@ -93,6 +93,24 @@ describe('evaluateManifest', () => {
   it('sin hostContractVersion → no-op (ok)', () => {
     expect(evaluateManifest(withMin('0.80.0', '0.2.0'), hostProvided)).toMatchObject({ok: true});
   });
+  it('host con nombre: usa su entrada de minHostContracts', () => {
+    const m = {...validManifest, minHostContracts: {'mi-banco': {reactNative: '0.76.0', contractVersion: '1.3.0'}}};
+    expect(evaluateManifest(m, hostProvided, '1.2.0', 'mi-banco')).toMatchObject({ok: false, reason: 'host-too-old'});
+    expect(evaluateManifest(m, hostProvided, '1.3.0', 'mi-banco')).toMatchObject({ok: true});
+  });
+  it('host con nombre sin entrada propia: no compara el contractVersion de otro host', () => {
+    const m = {
+      ...withMin('0.76.0', '9.0.0'),
+      minHostContracts: {'banco-lab': {reactNative: '0.76.0', contractVersion: '9.0.0'}},
+    };
+    expect(evaluateManifest(m, hostProvided, '1.2.0', 'mi-banco')).toMatchObject({ok: true});
+  });
+  it('host con nombre sin entrada propia: sí compara react-native', () => {
+    expect(evaluateManifest(withMin('0.80.0', '0.1.0'), hostProvided, '1.2.0', 'mi-banco')).toMatchObject({
+      ok: false,
+      reason: 'host-too-old',
+    });
+  });
   it('sin minHostContract → ok', () => {
     expect(evaluateManifest(validManifest, hostProvided, '0.1.0')).toMatchObject({ok: true});
   });

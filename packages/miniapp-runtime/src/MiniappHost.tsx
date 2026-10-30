@@ -48,6 +48,8 @@ export interface MiniappHostProps {
   retry?: { maxAuto?: number; backoffMs?: number };
   /** contractVersion del host — habilita el guard host-too-old (minHostContract). */
   hostContractVersion?: string;
+  /** Nombre del host ("mi-banco"): elige su mínimo en `minHostContracts`. */
+  host?: string;
   /** Versión servida (del catálogo) — habilita el cache por-versión del resolve. */
   resolveVersion?: string;
   /** Telemetría de runtime (best-effort). */
@@ -103,6 +105,7 @@ export function MiniappHost(props: MiniappHostProps): React.JSX.Element {
     signatureMode: props.signatureMode,
     retry: props.retry,
     hostContractVersion: props.hostContractVersion,
+    host: props.host,
     resolveVersion: props.resolveVersion,
     metrics: props.metrics,
   });

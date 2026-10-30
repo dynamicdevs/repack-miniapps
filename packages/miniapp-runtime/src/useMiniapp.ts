@@ -29,6 +29,8 @@ export interface UseMiniappDeps {
   signatureMode?: SignatureMode;
   /** contractVersion del propio host — habilita el guard host-too-old (minHostContract). */
   hostContractVersion?: string;
+  /** Nombre del host ("mi-banco"): elige su mínimo en `minHostContracts`. */
+  host?: string;
   /** Versión servida a resolver (del catálogo) — habilita el cache por-versión. */
   resolveVersion?: string;
   /** Telemetría (best-effort): reporta mount / fallback. Opcional → no-op si falta. */
@@ -89,7 +91,7 @@ export function useMiniapp(deps: UseMiniappDeps): UseMiniappResult {
           if (cancelled.current) return;
           mountVersion = resolved.version;
 
-          const evaluated = evaluateManifest(resolved.manifest, hostProvided, deps.hostContractVersion);
+          const evaluated = evaluateManifest(resolved.manifest, hostProvided, deps.hostContractVersion, deps.host);
           if (!evaluated.ok) {
             failure = { reason: evaluated.reason, detail: evaluated.detail };
           } else {
@@ -151,7 +153,7 @@ export function useMiniapp(deps: UseMiniappDeps): UseMiniappResult {
     return () => {
       cancelled.current = true;
     };
-  }, [id, resolveClient, chunkLoader, hostProvided, integrity, deps.signature, deps.signatureMode, deps.hostContractVersion, deps.resolveVersion, attempt, maxAuto, backoffMs]);
+  }, [id, resolveClient, chunkLoader, hostProvided, integrity, deps.signature, deps.signatureMode, deps.hostContractVersion, deps.host, deps.resolveVersion, attempt, maxAuto, backoffMs]);
 
   return { state, Entry, reload, retrying };
 }
