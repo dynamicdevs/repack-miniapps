@@ -182,3 +182,25 @@ test("checkModules avisa si git ignora archivos de un módulo (p. ej. dist/ en .
   writeFileSync(join(dest, ".gitignore"), "dist/\n!modules/*/dist/\n");
   assert.deepEqual(checkModules(dest), []);
 });
+
+test("checkModules ignora .DS_Store (Finder lo crea al abrir la carpeta)", () => {
+  const dest = fakeDest();
+  syncModules(dest, ["miniapp-contract"], opts(fakeSource()));
+  writeFileSync(join(dest, "modules", "miniapp-contract", ".DS_Store"), "x");
+  writeFileSync(join(dest, "modules", "miniapp-contract", "src", ".DS_Store"), "x");
+  assert.deepEqual(checkModules(dest), []);
+});
+
+test("si un paquete falla, no se toca ningún módulo ni el registro", () => {
+  const source = fakeSource();
+  const dest = fakeDest();
+  syncModules(dest, ["miniapp-contract", "miniapp-runtime"], opts(source));
+  const before = readFileSync(join(dest, "modules", ".source.json"), "utf8");
+  writeFileSync(join(source, "packages", "miniapp-contract", "src", "index.ts"), "export const a = 2;\n");
+  rmSync(join(source, "packages", "miniapp-runtime", "dist"), { recursive: true });
+
+  assert.throws(() => syncModules(dest, ["miniapp-contract", "miniapp-runtime"], { ...opts(source), commit: "zzz" }), /dist/);
+  assert.equal(readFileSync(join(dest, "modules", ".source.json"), "utf8"), before);
+  assert.equal(readFileSync(join(dest, "modules", "miniapp-contract", "src", "index.ts"), "utf8"), "export const a = 1;\n");
+  assert.deepEqual(checkModules(dest), []);
+});

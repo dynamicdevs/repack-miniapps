@@ -47,9 +47,12 @@ export function adaptPackageJson(pkg, siblings) {
 
 const isTest = (rel) => rel.includes("__tests__/") || /\.test\.[cm]?[jt]sx?$/.test(rel);
 
+// Basura del sistema que no cuenta como edición (Finder crea .DS_Store al abrir una carpeta).
+const OS_JUNK = new Set([".DS_Store", "Thumbs.db"]);
+
 function walk(dir, base = dir) {
   if (!existsSync(dir)) return [];
-  return readdirSync(dir).flatMap((name) => {
+  return readdirSync(dir).filter((name) => !OS_JUNK.has(name)).flatMap((name) => {
     const p = join(dir, name);
     return statSync(p).isDirectory() ? walk(p, base) : [relative(base, p)];
   });
@@ -150,12 +153,16 @@ export function syncModules(repo, dirs, { source, commit, build = true, force = 
     }
   }
 
-  for (const dir of dirs) {
+  // Primero se compila y se lee todo; el destino solo se toca si todos los paquetes están bien,
+  // para no dejar un módulo reescrito con el registro viejo.
+  const prepared = dirs.map((dir) => {
     const pkgDir = join(source, "packages", dir);
     if (build) execFileSync("pnpm", ["--filter", `./packages/${dir}`, "build"], { cwd: source, stdio: "inherit" });
     if (!existsSync(join(pkgDir, "dist"))) throw new Error(`${dir}: no hay dist/ (compilar el paquete antes)`);
+    return { dir, ...moduleFiles(pkgDir, siblings) };
+  });
 
-    const { pkg, files } = moduleFiles(pkgDir, siblings);
+  for (const { dir, pkg, files } of prepared) {
     const target = join(repo, "modules", dir);
     rmSync(target, { recursive: true, force: true });
     const hashes = {};
