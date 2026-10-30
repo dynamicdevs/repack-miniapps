@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from "node:fs";
+import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync, utimesSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { execFileSync } from "node:child_process";
 import { join } from "node:path";
@@ -203,4 +203,11 @@ test("si un paquete falla, no se toca ningún módulo ni el registro", () => {
   assert.equal(readFileSync(join(dest, "modules", ".source.json"), "utf8"), before);
   assert.equal(readFileSync(join(dest, "modules", "miniapp-contract", "src", "index.ts"), "utf8"), "export const a = 1;\n");
   assert.deepEqual(checkModules(dest), []);
+});
+
+test("se niega a copiar un dist más viejo que su src (paquete sin recompilar)", () => {
+  const source = fakeSource();
+  const future = new Date(Date.now() + 60_000);
+  utimesSync(join(source, "packages", "miniapp-contract", "src", "index.ts"), future, future);
+  assert.throws(() => syncModules(fakeDest(), ["miniapp-contract"], opts(source)), /dist.*desactualizado/);
 });

@@ -76,6 +76,17 @@ function moduleFiles(pkgDir, siblings) {
   return { pkg, files };
 }
 
+const newest = (dir, files) => Math.max(0, ...files.map((rel) => statSync(join(dir, rel)).mtimeMs));
+
+/** Un src/ modificado después del último build dejaría en el módulo un dist que no le corresponde. */
+function assertDistFresh(pkgDir, dir) {
+  const src = walk(join(pkgDir, "src")).filter((rel) => !isTest(`src/${rel}`));
+  const dist = walk(join(pkgDir, "dist"));
+  if (newest(join(pkgDir, "src"), src) > newest(join(pkgDir, "dist"), dist)) {
+    throw new Error(`${dir}: el dist/ está desactualizado respecto de src/ (compilar el paquete antes)`);
+  }
+}
+
 function readRecord(repo) {
   const file = join(repo, "modules", RECORD);
   return existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : null;
@@ -159,6 +170,7 @@ export function syncModules(repo, dirs, { source, commit, build = true, force = 
     const pkgDir = join(source, "packages", dir);
     if (build) execFileSync("pnpm", ["--filter", `./packages/${dir}`, "build"], { cwd: source, stdio: "inherit" });
     if (!existsSync(join(pkgDir, "dist"))) throw new Error(`${dir}: no hay dist/ (compilar el paquete antes)`);
+    assertDistFresh(pkgDir, dir);
     return { dir, ...moduleFiles(pkgDir, siblings) };
   });
 
