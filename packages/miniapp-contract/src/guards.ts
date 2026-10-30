@@ -1,5 +1,6 @@
 /** Pure validation / parsing for the contract. Unit-tested in Bolt 1. */
 import type { Capability, HostContract, Manifest, MiniappId, SemVer, SharedDepSpec } from "./types.js";
+import { isHostName } from "./host-key.js";
 
 const SEMVER_RE = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/;
 const MINIAPP_ID_RE = /^[a-z0-9]+(?:[-_][a-z0-9]+)*$/;
@@ -45,25 +46,30 @@ export function isManifest(x: unknown): x is Manifest {
   if (o.integrity !== undefined && typeof o.integrity !== "string") return false;
   if (o.signature !== undefined && typeof o.signature !== "string") return false;
 
-  if (o.minHostContract !== undefined) {
-    const mh = o.minHostContract as Record<string, unknown>;
-    if (
-      typeof mh !== "object" ||
-      mh === null ||
-      typeof mh.reactNative !== "string" ||
-      typeof mh.contractVersion !== "string"
-    ) {
-      return false;
+  if (o.minHostContract !== undefined && !isMinHostContract(o.minHostContract)) return false;
+  if (o.minHostContracts !== undefined) {
+    const by = o.minHostContracts;
+    if (typeof by !== "object" || by === null || Array.isArray(by)) return false;
+    for (const [host, min] of Object.entries(by)) {
+      if (!isHostName(host) || !isMinHostContract(min)) return false;
     }
   }
+  if (o.hosts !== undefined && (!Array.isArray(o.hosts) || !o.hosts.every(isHostName))) return false;
 
   return true;
+}
+
+function isMinHostContract(x: unknown): boolean {
+  if (typeof x !== "object" || x === null) return false;
+  const mh = x as Record<string, unknown>;
+  return typeof mh.reactNative === "string" && typeof mh.contractVersion === "string";
 }
 
 /** Structural type guard for a HostContract coming from an untrusted source. */
 export function isHostContract(v: unknown): v is HostContract {
   if (typeof v !== "object" || v === null) return false;
   const c = v as Record<string, unknown>;
+  if (c.host !== undefined && !isHostName(c.host)) return false;
   if (
     typeof c.contractVersion !== "string" ||
     typeof c.reactNative !== "string" ||

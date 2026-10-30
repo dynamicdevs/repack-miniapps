@@ -32,7 +32,7 @@ export interface ControlManifestBody {
   readonly seq: number;
   readonly issuedAt: string;
   readonly expiresAt: string;
-  /** contractVersion del host → id de miniapp → punteros por canal. */
+  /** Clave del host (`hostKey`: `host@contractVersion` o `contractVersion`) → id → punteros. */
   readonly hosts: Readonly<Record<string, Readonly<Record<string, ChannelPointers>>>>;
   /** id → versión → entrada. Solo versiones NO retiradas. */
   readonly versions: Readonly<Record<string, Readonly<Record<string, ManifestVersionEntry>>>>;
@@ -97,9 +97,20 @@ export interface SelectedVersion {
   readonly channelUsed: Channel;
 }
 
-/** ¿El manifiesto trae bloque para este contractVersion del host? */
-export function hasHostBlock(body: ControlManifestBody, hostContractVersion: string): boolean {
-  return Object.prototype.hasOwnProperty.call(body.hosts, hostContractVersion);
+/**
+ * Clave del bloque de este host: la primera de `keys` que el manifiesto trae (ver
+ * `hostKeyCandidates`), o null. Un string se toma como una sola clave.
+ */
+export function findHostKey(body: ControlManifestBody, keys: string | readonly string[]): string | null {
+  for (const key of typeof keys === "string" ? [keys] : keys) {
+    if (Object.prototype.hasOwnProperty.call(body.hosts, key)) return key;
+  }
+  return null;
+}
+
+/** ¿El manifiesto trae bloque para este host? (`keys`: su clave o sus candidatas en orden). */
+export function hasHostBlock(body: ControlManifestBody, keys: string | readonly string[]): boolean {
+  return findHostKey(body, keys) !== null;
 }
 
 function pick(
@@ -126,13 +137,14 @@ function pick(
  */
 export function selectVersion(
   body: ControlManifestBody,
-  hostContractVersion: string,
+  hostKeys: string | readonly string[],
   id: string,
   channel: FlagChannel,
   platform: "android" | "ios",
 ): SelectedVersion | null {
-  if (!hasHostBlock(body, hostContractVersion)) return null;
-  const block = body.hosts[hostContractVersion];
+  const key = findHostKey(body, hostKeys);
+  if (key === null) return null;
+  const block = body.hosts[key];
   const pointers = block !== undefined && Object.prototype.hasOwnProperty.call(block, id) ? block[id] : undefined;
   if (pointers === undefined) return null;
 

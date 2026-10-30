@@ -55,6 +55,15 @@ export interface Manifest {
   readonly signature?: string;
   /** Minimum host contract this manifest was built against (compat with older hosts). */
   readonly minHostContract?: { readonly reactNative: string; readonly contractVersion: string };
+  /**
+   * Mínimo por host (`host` del contract → mínimo). Cada host numera sus contracts por su cuenta:
+   * contra un contract con `host` solo se compara su propia entrada.
+   */
+  readonly minHostContracts?: Readonly<
+    Record<string, { readonly reactNative: string; readonly contractVersion: string }>
+  >;
+  /** Hosts a los que va la miniapp (`host` de sus contracts). Sin la lista, cualquiera. */
+  readonly hosts?: readonly string[];
 }
 
 /** Host → Backstage resolve request. */
@@ -83,6 +92,11 @@ export interface MiniappEntryProps {
 
 /** The Host Platform Contract: what the host provides (source of truth for compat). */
 export interface HostContract {
+  /**
+   * Host al que pertenece el contract ("mi-banco", "banco-lab"). Opcional: los contracts anteriores
+   * no lo traen. Con él, la clave del host es `host@contractVersion` (ver `hostKey`).
+   */
+  readonly host?: string;
   /** SemVer that bumps when the platform contract changes. */
   contractVersion: string;
   /** react-native version of the host. */

@@ -1,6 +1,6 @@
 {
   "name": "@dentvega/miniapp-contract",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "description": "Shared contract between the mobile host and the Backstage registry: manifest, resolve shape, capabilities, and version-skew logic.",
   "license": "MIT",
   "repository": {

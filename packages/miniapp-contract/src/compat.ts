@@ -5,6 +5,7 @@
  */
 import type { HostContract, Manifest, SharedDepSpec, SemVer } from "./types.js";
 import { gteVersion, satisfiesShared, type SkewResult } from "./shared.js";
+import { hostKey } from "./host-key.js";
 
 export interface NativeCheckResult {
   readonly compatible: boolean;
@@ -52,8 +53,12 @@ export function checkCompatibility(
 
 /**
  * Compatibilidad de un manifest contra un host, con los motivos en texto:
- * shared (semver) + módulos nativos + `minHostContract` (contractVersion y
+ * shared (semver) + módulos nativos + mínimo de contract (contractVersion y
  * reactNative con `gteVersion`). Lo usa el servidor al derivar los bloques por host.
+ *
+ * El mínimo: contra un contract con `host`, su entrada de `minHostContracts`; si no la hay, solo el
+ * `reactNative` de `minHostContract` (el contractVersion de otro host no se compara: cada host
+ * numera por su cuenta). Contra un contract sin `host`, `minHostContract` entero, como siempre.
  */
 export function hostCompatReport(
   contract: HostContract,
@@ -68,13 +73,15 @@ export function hostCompatReport(
     }
   }
   for (const m of report.native.missing) reasons.push(`falta el módulo nativo ${m}`);
-  const min = manifest.minHostContract;
+  const own = contract.host ? manifest.minHostContracts?.[contract.host] : undefined;
+  const min = own ?? manifest.minHostContract;
+  const compareContract = own !== undefined || !contract.host;
   if (min !== undefined) {
-    if (!gteVersion(contract.contractVersion, min.contractVersion)) {
-      reasons.push(`requiere contractVersion >= ${min.contractVersion} (host ${contract.contractVersion})`);
+    if (compareContract && !gteVersion(contract.contractVersion, min.contractVersion)) {
+      reasons.push(`requiere contractVersion >= ${min.contractVersion} (host ${hostKey(contract)})`);
     }
     if (!gteVersion(contract.reactNative, min.reactNative)) {
-      reasons.push(`requiere react-native >= ${min.reactNative} (host ${contract.reactNative})`);
+      reasons.push(`requiere react-native >= ${min.reactNative} (host ${hostKey(contract)})`);
     }
   }
   return { compatible: reasons.length === 0, reasons };
