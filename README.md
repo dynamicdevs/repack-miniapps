@@ -59,7 +59,8 @@ node modules/sync-modules.mjs --check .                     # in the consumer: c
 
 Each module has `package.json` (no publish or dev fields; sibling packages via `file:`), `src/`
 without tests, `dist/` and `README.md`. `modules/.source.json` records the commit and a sha256 per
-file: `--check` fails if a copy was edited by hand, and `sync-modules` refuses to overwrite an
+file: `--check` fails if a copy was edited by hand or if the consumer's `.gitignore` leaves module
+files out (e.g. `dist/`; add `!modules/*/dist/`), and `sync-modules` refuses to overwrite an
 edited copy unless `--force` is passed. After updating a module, run `pnpm install` in the
 consumer (pnpm copies `file:` dependencies at install time).
 

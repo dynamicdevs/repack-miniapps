@@ -169,3 +169,16 @@ test("deja el script en modules/ para que el consumidor pueda comprobar sus copi
   writeFileSync(join(dest, "modules", "miniapp-contract", "README.md"), "otro\n");
   assert.throws(() => execFileSync("node", [script, "--check", dest], { stdio: "pipe" }));
 });
+
+test("checkModules avisa si git ignora archivos de un módulo (p. ej. dist/ en .gitignore)", () => {
+  const dest = fakeDest();
+  execFileSync("git", ["init", "-q"], { cwd: dest });
+  writeFileSync(join(dest, ".gitignore"), "dist/\n");
+  syncModules(dest, ["miniapp-contract"], opts(fakeSource()));
+  assert.deepEqual(checkModules(dest).sort(), [
+    "miniapp-contract/dist/index.d.ts: ignorado por git",
+    "miniapp-contract/dist/index.js: ignorado por git",
+  ]);
+  writeFileSync(join(dest, ".gitignore"), "dist/\n!modules/*/dist/\n");
+  assert.deepEqual(checkModules(dest), []);
+});

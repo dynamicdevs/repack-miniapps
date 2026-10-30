@@ -92,11 +92,37 @@ function diffModule(repo, dir, entry) {
   return problems;
 }
 
+/** Archivos de los módulos que el .gitignore del repo deja fuera (no llegarían a un clon limpio). */
+function gitIgnored(repo, record) {
+  const paths = Object.entries(record.packages).flatMap(([dir, entry]) =>
+    Object.keys(entry.files).map((rel) => `modules/${dir}/${rel}`),
+  );
+  try {
+    execFileSync("git", ["rev-parse", "--is-inside-work-tree"], { cwd: repo, stdio: "ignore" });
+  } catch {
+    return []; // fuera de git no hay nada que comprobar
+  }
+  try {
+    const out = execFileSync("git", ["check-ignore", "--no-index", "--stdin"], {
+      cwd: repo,
+      input: paths.join("\n"),
+      encoding: "utf8",
+    });
+    return out.split("\n").filter(Boolean);
+  } catch (err) {
+    if (err.status === 1) return []; // ninguno ignorado
+    throw err;
+  }
+}
+
 /** Problemas de los módulos de un repo respecto a `.source.json`; vacío si todo coincide. */
 export function checkModules(repo) {
   const record = readRecord(repo);
   if (record === null) return [`modules/${RECORD}: falta`];
-  return Object.entries(record.packages).flatMap(([dir, entry]) => diffModule(repo, dir, entry));
+  return [
+    ...Object.entries(record.packages).flatMap(([dir, entry]) => diffModule(repo, dir, entry)),
+    ...gitIgnored(repo, record).map((p) => `${p.slice("modules/".length)}: ignorado por git`),
+  ];
 }
 
 /**
