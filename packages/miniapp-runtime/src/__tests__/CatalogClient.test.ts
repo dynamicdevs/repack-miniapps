@@ -28,6 +28,17 @@ describe("httpCatalogClient", () => {
     expect(await httpCatalogClient("https://x").list()).toEqual([]);
   });
 
+  it("pide el catálogo de su host (host@contractVersion)", async () => {
+    const urls: string[] = [];
+    globalThis.fetch = (async (url: string) => {
+      urls.push(url);
+      return { ok: true, status: 200, json: async () => ({ miniapps: [] }) };
+    }) as unknown as typeof fetch;
+    await httpCatalogClient("https://x/", { host: "mi-banco", hostContractVersion: "1.2.0" }).list();
+    await httpCatalogClient("https://x", { hostContractVersion: "1.2.0" }).list();
+    expect(urls).toEqual(["https://x/api/miniapps?host=mi-banco%401.2.0", "https://x/api/miniapps?host=1.2.0"]);
+  });
+
   it("throws on a non-2xx response", async () => {
     globalThis.fetch = fakeFetch(500, {});
     await expect(httpCatalogClient("https://x").list()).rejects.toThrow("HTTP 500");
