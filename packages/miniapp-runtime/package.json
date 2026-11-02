@@ -1,6 +1,6 @@
 {
   "name": "@dentvega/miniapp-runtime",
-  "version": "0.2.3",
+  "version": "0.4.0",
   "description": "Host-side runtime for Re.Pack miniapp platforms: resolve → verify (integrity + Ed25519 signature) → mount → fallback. Headless; bring your own ChunkLoader and UI.",
   "license": "MIT",
   "repository": {

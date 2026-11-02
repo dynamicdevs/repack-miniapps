@@ -34,7 +34,7 @@ const body: ControlManifestBody = {
 };
 const legacyResp: ResolveResponse = { id: ID, version: "9.9.9" as SemVer, url: "http://legacy", manifest: m("9.9.9") };
 
-function make(flags: FlagsResult, b: ControlManifestBody = body, host = HOST) {
+function make(flags: FlagsResult, b: ControlManifestBody = body, host = HOST, hostName?: string) {
   let legacyCalls = 0;
   const legacy: ResolveClient = {
     resolve: async () => {
@@ -48,6 +48,7 @@ function make(flags: FlagsResult, b: ControlManifestBody = body, host = HOST) {
     flags: flagsClient,
     legacy,
     hostContractVersion: host,
+    ...(hostName !== undefined ? { host: hostName } : {}),
     subject: () => "u1",
   });
   return { client, legacyCalls: () => legacyCalls };
@@ -57,6 +58,18 @@ describe("manifestResolveClient", () => {
   it("available=false → disabled", async () => {
     const { client } = make({ available: false, channel: "stable" });
     await expect(client.resolve({ id: ID, platform: "android" })).rejects.toMatchObject({ reason: "disabled" });
+  });
+
+  it("con host: usa el bloque host@cv antes que el pelado", async () => {
+    const b = { ...body, hosts: { ...body.hosts, "mi-banco@0.2.0": { acc: { stable: "1.1.0" as SemVer } } } };
+    const { client } = make({ available: true, channel: "stable" }, b, HOST, "mi-banco");
+    expect((await client.resolve({ id: ID, platform: "android" })).version).toBe("1.1.0");
+  });
+
+  it("con host y control plane viejo (solo bloque pelado) → usa el pelado", async () => {
+    const { client, legacyCalls } = make({ available: true, channel: "stable" }, body, HOST, "mi-banco");
+    expect((await client.resolve({ id: ID, platform: "android" })).version).toBe("1.0.0");
+    expect(legacyCalls()).toBe(0);
   });
 
   it("sin bloque para el host → delega en legacy", async () => {

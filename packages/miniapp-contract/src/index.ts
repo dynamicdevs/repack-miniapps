@@ -12,6 +12,7 @@ export type {
 } from "./types.js";
 
 export { parseSemVer, parseMiniappId, isManifest, isHostContract } from "./guards.js";
+export { isHostName, hostKey, parseHostKey, hostKeyCandidates } from "./host-key.js";
 
 export type { SkewStatus, SkewEntry, SkewResult } from "./shared.js";
 export { gteVersion, satisfiesRange, satisfiesShared } from "./shared.js";
@@ -34,6 +35,7 @@ export {
   canonicalJson,
   controlManifestMessage,
   isSignedControlManifest,
+  findHostKey,
   hasHostBlock,
   selectVersion,
 } from "./control.js";

@@ -8,8 +8,9 @@
   "scripts": {
     "build": "pnpm -r --if-present build",
     "typecheck": "pnpm -r --if-present typecheck",
-    "test": "pnpm -r --if-present test",
-    "verify": "node scripts/verify-provider.mjs"
+    "test": "pnpm -r --if-present test && node --test scripts/*.test.mjs",
+    "verify": "node scripts/verify-provider.mjs",
+    "modules": "node scripts/sync-modules.mjs"
   },
   "dependencies": {
     "@dentvega/miniapp-storage": "workspace:*"

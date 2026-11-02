@@ -6,7 +6,7 @@
  * Esto cubre lo que ellos no pueden: que tus credenciales sirvan, que el bucket acepte
  * la escritura, que el objeto quede legible públicamente y que el borrado funcione.
  *
- * Uso:  node scripts/verify-provider.mjs [s3|r2|gcs|azure|blob]
+ * Uso:  node scripts/verify-provider.mjs [s3|r2|gcs|azure|modyo|blob]
  *       (sin argumento, prueba todos los que estén configurados por env)
  *
  * No borra nada que no haya creado: escribe bajo un prefijo único y lo limpia al final.
@@ -17,6 +17,7 @@ import {
   r2Storage, r2ConfigFromEnv,
   gcsStorage, gcsConfigFromEnv,
   azureStorage, azureConfigFromEnv,
+  modyoStorage, modyoConfigFromEnv,
 } from "@dentvega/miniapp-storage";
 
 const BUILDERS = {
@@ -24,7 +25,11 @@ const BUILDERS = {
   r2: [r2ConfigFromEnv, r2Storage],
   gcs: [gcsConfigFromEnv, gcsStorage],
   azure: [azureConfigFromEnv, azureStorage],
+  modyo: [modyoConfigFromEnv, modyoStorage],
 };
+
+// Sin borrado: las versiones podadas se quedan publicadas (ver modyoStorage).
+const SIN_BORRADO = new Set(["modyo"]);
 
 const only = process.argv[2];
 const configured = availableProviders(process.env).filter((p) => p in BUILDERS);
@@ -39,6 +44,10 @@ if (targets.length === 0) {
 const stamp = `${process.pid}-${Math.floor(Number(process.hrtime.bigint() % 1000000n))}`;
 const prefix = `__verify__/${stamp}`;
 const body = new TextEncoder().encode(`verify ${stamp}\n`);
+// Un .bundle con bytes no ASCII: el host compara el sha256 del chunk, así que el proveedor tiene
+// que servirlo tal cual (sin recomprimir, minificar ni cambiar la codificación).
+const bundle = new TextEncoder().encode(`// verify ${stamp} ñ ✓\nglobalThis.x = 1;\n`);
+const sha256 = async (data) => Buffer.from(await crypto.subtle.digest("SHA-256", data)).toString("hex");
 
 let failed = 0;
 
@@ -61,7 +70,10 @@ for (const name of targets) {
   const storage = build(cfg);
   try {
     // 1. Escritura
-    const { baseUrl } = await storage.putMany(prefix, [{ path: "probe.json", data: body }]);
+    const { baseUrl } = await storage.putMany(prefix, [
+      { path: "probe.json", data: body },
+      { path: "probe.container.js.bundle", data: bundle },
+    ]);
     console.log(`  ✓ escritura      → ${baseUrl}/probe.json`);
 
     // 2. Lectura pública — el host descarga los chunks por acá, así que tiene que ser legible
@@ -80,7 +92,24 @@ for (const name of targets) {
       }
     }
 
-    // 3. Borrado (lo usa el prune de versiones viejas)
+    // 3. El .bundle llega con los mismos bytes que se subieron.
+    const chunk = await fetch(`${baseUrl}/probe.container.js.bundle`);
+    const servido = chunk.ok ? new Uint8Array(await chunk.arrayBuffer()) : null;
+    if (servido === null) {
+      console.error(`  ✗ .bundle        → HTTP ${chunk.status}`);
+      failed++;
+    } else if ((await sha256(servido)) !== (await sha256(bundle))) {
+      console.error(`  ✗ .bundle        → el sha256 no coincide: el proveedor modifica los bytes`);
+      failed++;
+    } else {
+      console.log(`  ✓ .bundle        → mismo sha256 (${chunk.headers.get("content-type") ?? "sin content-type"})`);
+    }
+
+    // 4. Borrado (lo usa el prune de versiones viejas)
+    if (SIN_BORRADO.has(name)) {
+      console.log(`  - borrado        → no aplica: queda publicado en ${baseUrl}`);
+      continue;
+    }
     await storage.deletePrefix(prefix);
     const after = await fetch(`${baseUrl}/probe.json`);
     if (after.ok) {

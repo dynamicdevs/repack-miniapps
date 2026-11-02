@@ -105,7 +105,7 @@ The clients in this package call the following endpoints on the `baseUrl` you pa
 | Client | Method | Path | Notes |
 | --- | --- | --- | --- |
 | `httpResolveClient` (`src/ResolveClient.ts`) | `GET` | `/api/resolve` | Query params: `id` (required), `hostVersion?`, `version?`, `platform?`. |
-| `httpCatalogClient` (`src/CatalogClient.ts`) | `GET` | `/api/miniapps` | No params. Returns `{ miniapps: MiniappSummary[] }`. |
+| `httpCatalogClient` (`src/CatalogClient.ts`) | `GET` | `/api/miniapps` | `host?` (`host@contractVersion`, when the client gets `{ host, hostContractVersion }`): stable/candidate for that host. Returns `{ miniapps: MiniappSummary[] }`. |
 | `httpMetricsClient` (`src/MetricsClient.ts`) | `POST` | `/api/metrics` | Body `{ events: [MetricEvent] }`. Fire-and-forget: errors are swallowed. |
 | `httpTrustBundleClient` (`src/trustBundle.ts`) | `GET` | `/api/trust-bundle` | No params. Returns a `{ bundle, signature }` envelope signed by the root key. |
 
